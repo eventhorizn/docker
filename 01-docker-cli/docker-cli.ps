@@ -1,0 +1,109 @@
+// simple hello world
+docker run hello-world
+
+
+
+// command override
+// docker run <image name> <command>
+docker run busybox echo hi there
+
+// listing unix folders inside container
+docker run busybox ls
+
+// the echo and li commands exist inside the busybox image
+// they do NOT exist in the hello-world image
+// commands are limited by the image
+docker run hello-world echo hi // throws an error
+
+
+
+// list all images on machine
+docker ps
+
+// busybox and hello-world are short running containers
+docker run busybox ping google.com // keep container running
+docker ps
+
+
+
+// list of all containers ever created
+docker ps --all
+
+// when does a container get shut down, why, and what happens?
+// container lifecycle
+// docker run = docker create + docker start
+
+
+
+// create image
+docker create hello-world
+
+// you'll get a long string like so
+// f7b241874c91443af5c22f3f4fd3de79e397ce4118c9c2d532d80adb33039cc9
+
+// start an image
+docker start -a f7b241874c91443af5c22f3f4fd3de79e397ce4118c9c2d532d80adb33039cc9
+
+// what does -a do for you?
+// makes docker wait for output and prints it out to terminal
+// docker start will not show you output by default
+
+// can restart a container
+docker run busybox echo hi there
+
+docker ps --all // grab id
+
+docker start -a id
+
+// you'll notice it showed 'hi there'
+// you cannot replace the default command of a container once it's created
+// you can only start it and it will run the default command
+
+
+
+// how to clear containers that have downloaded?
+docker ps --all
+
+docker system prune
+
+// deletes cache as well as downloaded images
+docker ps --all
+
+
+
+// retrieving log outputs
+
+docker logs <container id>
+
+docker create busybox echo hi there
+
+// take id
+docker start <id>
+
+// shows you all the logs emited by the container
+// it does NOT re-run the container
+docker logs <id>
+
+
+
+// stopping containers
+docker create busybox ping google.com
+
+docker start <id>
+
+docker logs <id> // you'll get logs, container is running
+
+docker ps // shows the image is running
+
+// so how do we stop this container?
+
+// allows container to shut down gracefully and cleanup
+// if it doesn't stop in 10 seconds, it will kill
+docker stop <id>
+
+// shut down right now, no cleanup
+docker kill <id>
+
+
+
+// multi command containers
