@@ -107,3 +107,38 @@ docker kill <id>
 
 
 // multi command containers
+// redis is a server that has it's own cli
+// you can run commands thru the cli
+// can we run those commands on a running container?
+docker run redis
+
+// * Ready to accept connections
+
+// how do we run commands in a container?
+docker exec -it <id> <command>
+
+// in a new terminal window
+docker exec -it <id> redis-cli
+// the -it flag is very important
+// it's really two flags, -i -t
+// -i ties terminal to STDIN of image
+// -t makes the text in and out pretty
+// not including the 't' doesn't give you 'intellisense' either
+
+
+
+// getting a command prompt in a container
+// open a shell in context of container
+docker exec -it <id> sh
+// ctrl-c or ctrl-d to exit
+
+
+
+// Starting w/ a shell
+docker run -it busybox sh
+// starts the container w/ the sh command
+
+
+
+// Container Isolation
+// containers do not share their fs by default
