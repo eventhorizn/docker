@@ -202,3 +202,89 @@ docker run hello-world
    ```
    docker run -it busybox sh
    ```
+
+# Building a Custom Image
+
+## Docker Build
+
+```Dockerfile
+# Use an existing docker image as a base
+FROM alpine
+
+# Download and install a dependency
+RUN apk add --update redis
+
+# Tell the image what to do when it starts
+# as a container
+CMD [ "redis-server" ]
+```
+
+![](images/docker-build.png)
+
+1. After building your custom Dockerfile
+
+   - Open terminal in folder where Dockerfile exists
+
+   ```
+   docker build .
+   ```
+
+   - You'll get an id after creation
+
+   ```
+   docker run <id>
+   ```
+
+1. What is the `.`?
+   - Build context
+   - More to come
+1. Big takeaway
+   - Every step in the Dockerfile creates a temporary image
+   - Runs a command in that image (an image can have only one default command)
+   - Next step uses previous image as 'starting point'
+
+## Rebuilds with Cache
+
+![](images/docker-build-image.png)
+
+1. If you rebuild a Dockerfile and it has steps that it's ran before, it will use the cache of the previous run
+1. In the above image, step 3 is new, so it uses cache values for everything else
+   - It will create new images from the introduction of the new instruction
+   - This is true if you reorder steps!
+
+## Tagging an Image
+
+1. Needing to know the id of an image to run it is annoying
+   ```
+   docker build -t <dockerid>/<repo/project>:<version> .
+   ```
+   ```
+   docker build -t eventhorizn/redis:latest .
+   ```
+   ```
+   docker run eventhorizn/redis
+   ```
+1. The version at the end is the tag technically
+1. Whole process is called tagging though
+
+## Manual Image Generation with Docker Commit
+
+1. You create a container from an image, but
+1. You can also create an image from a container
+   ```
+   docker run -it apline sh
+   ```
+   ```
+   /# apk add --update redis
+   ```
+   - Open a new terminal
+   ```
+   docker ps
+   ```
+   - Get id
+   ```
+   docker commit -c "CMD 'redis-server'" <id>
+   ```
+   ```
+   docker run <new id>
+   ```
