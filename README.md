@@ -288,3 +288,47 @@ CMD [ "redis-server" ]
    ```
    docker run <new id>
    ```
+
+# Making a Real Project
+
+1. We first tried creating a docker image for node w/ just the 'alpine' image
+   - But node and npm is not installed on it
+1. The issue is that 'alpine' is a term in Docker for 'as small as possible'
+1. The image we want to use is in the 'Node' repository
+   - But we still want the 'alpine' tag
+   - Because it's the smallest version of that image
+1. Running the node image just w/ `docker run <id>` will not work
+   - We need to do port forwarding
+1. Port forwarding is only something we do when running a container
+   ```
+   docker run -p 8080:8080 <id>
+   ```
+   - Ports from and to do NOT have to be identical
+   ```
+   docker run -p 5000:8080 <id>
+   ```
+1. So, what happens when you update a file and want to reflect that change in an image?
+
+   - We can't do hot reloading, so we have to rebuild the image
+   - With node, in order to keep it from re-running npm install and re-installing all of your node packages
+
+   ```
+   FROM node:alpine
+
+   WORKDIR /usr/app
+
+   # Copy everything from local working directory to container's
+   COPY ./package.json ./
+   RUN npm install
+
+   COPY ./ ./
+
+   CMD ["npm", "start"]
+   ```
+
+   - We first copy the package.json
+   - Then run the install
+   - Then copy everything else
+   - Will use the cache for package files
+
+1. Separate out copy steps when you can so reloading is faster
