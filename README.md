@@ -332,3 +332,79 @@ CMD [ "redis-server" ]
    - Will use the cache for package files
 
 1. Separate out copy steps when you can so reloading is faster
+
+# Docker Compose
+
+1. Why would we need multiple containers that are part of the 'same app'
+   - Node app in one container
+   - Redis in another
+1. All about scalability
+   - If your app got popular, you'd want many images for your node server, and one for redis
+1. This is why we wouldn't put node and redis in the same image!
+   - All node images would point to same redis image
+1. How do we connect two images together?
+   - CLI has networking commands that are a pain to use
+   - Docker Compose
+
+## What is Docker Compoose?
+
+1. Separate CLI that is installed w/ Docker
+1. Used to start up multiple Docker containers at the same time
+1. Automates some of the long-winded arguments we were passing to docker run
+1. Wrapper on Docker CLI that simplifies things
+1. Just by including your images in the same docker-compose file, they will be networked together
+1. docker-compose.yml
+   ```yml
+   version: '3'
+   services:
+   redis-server:
+     image: 'redis'
+   node-app:
+     build: .
+     ports:
+       - '4001:8081'
+   ```
+
+## Docker Compose Commands
+
+1. Docker run myimage
+   ```
+   docker-compose up
+   ```
+1. Docker build . + docker run myimage
+   ```
+   docker-compose up --build
+   ```
+1. Stop Containers
+   ```
+   docker-compose down
+   ```
+1. Container Status
+   ```
+   docker-compose ps
+   ```
+   - Looks for Docker-compose.yml file
+   - Will return status of images in that file
+1. In general, you need to run docker compose commands w/i the directory w/ the docker-compose.yml file
+
+## Restarting a container
+
+1. Restart policies
+   - "no"
+     - Needs quotes
+     - In yaml, no = false
+   - always
+   - on-failure
+   - unless-stopped
+1. In dockerfile
+   ```yml
+   version: '3'
+   services:
+   redis-server:
+     image: 'redis'
+   node-app:
+     restart: always
+     build: .
+     ports:
+       - '4001:8081'
+   ```
