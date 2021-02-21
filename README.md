@@ -408,3 +408,8 @@ CMD [ "redis-server" ]
      ports:
        - '4001:8081'
    ```
+
+# Create a Production Workflow
+
+1. Create an app
+   - [Link](https://create-react-app.dev/docs/getting-started/#npx)
