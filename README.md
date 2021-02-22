@@ -493,3 +493,15 @@ services:
       - .:/app
     command: ['npm', 'run', 'test']
 ```
+
+## Multi-Step Build Process
+
+1. For production, we build our node app, and need to host it on a production server
+   - Nginix
+1. How do we set that up?
+   - Build portion needs a node base image
+   - Run portion needs an ngnix base image
+1. We develop a 'multi-step' build process
+1. Has muiltipe phases
+   - Build Phase
+   - Run Phase
