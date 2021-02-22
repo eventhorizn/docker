@@ -413,3 +413,83 @@ CMD [ "redis-server" ]
 
 1. Create an app
    - [Link](https://create-react-app.dev/docs/getting-started/#npx)
+   - Creating 'frontend' app
+1. Create a dev dockerfile
+   - Dockerfile.dev
+   - How to run build on this file?
+   ```ps
+   docker build -f Dockerfile.dev
+   ```
+1. Running the react image
+   ```ps
+   docker run -p 3000:3000 IMAGE_ID
+   ```
+1. Back to the issue of propogating code changes to our container
+   - Docker Volumes
+   - We set up a 'reference' to our source code instead of copying
+   ```
+   docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/usr/app <id>
+   ```
+   - -v /usr/app/node_modules
+     - Needed as there's no node_modules on local machine to map to
+   - $(pwd) = present working directory
+     - Map pwd to /usr/app
+     - Colon says 'map something outside container to something inside'
+1. I was runningn issues running the Docker commands
+
+## Using Docker Compose
+
+```yml
+version: '3'
+services:
+  web:
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3000:3000'
+    volumes:
+      - /app/node_modules
+      - .:/app
+```
+
+1. Much easier to define what's happening
+1. I actually worked when the docker commands above didn't
+1. Should we keep the copy in the Dockerfile?
+   - It's best to keep it even if we are referencing the files on the local machine and not the container
+
+## Attaching Test Suite
+
+1. There are two options
+1. First is to run the docker image above and do a `docker exec` command to attach another docker image to it
+1. The second is to create a new environment on the docker compose file to run tests
+   - No interaction (which is fine)
+
+```yml
+version: '3'
+services:
+  web:
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3000:3000'
+    volumes:
+      - /app/node_modules
+      - .:/app
+ tests:
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ['npm', 'run', 'test']
+```
