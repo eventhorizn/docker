@@ -505,3 +505,91 @@ services:
 1. Has muiltipe phases
    - Build Phase
    - Run Phase
+
+# Deployment with AWS and TravisCI
+
+## Initial Setup
+
+1. Go to AWS Management Console
+1. Search for Elastic Beanstalk in "Find Services"
+1. Click the "Create Application" button
+1. Enter "docker" for the Application Name
+1. Scroll down to "Platform" and select "Docker" from the dropdown list.
+1. Change "Platform Branch" to Docker running on 64bit Amazon Linux
+1. Click "Create Application"
+1. You should see a green checkmark after some time.
+1. Click the link above the checkmark for your application. This should open the application in your browser and display a Congratulations message.
+
+## Change from Micro to Small instance type:
+
+- You may not need to do this
+- Note that a t2.small is outside of the free tier. t2 micro has been known to timeout and fail during the build process.
+
+1. In the left sidebar under Docker-env click "Configuration"
+1. Find "Capacity" and click "Edit"
+1. Scroll down to find the "Instance Type" and change from t2.micro to t2.small
+1. Click "Apply"
+1. The message might say "No Data" or "Severe" in Health Overview before changing to "Ok"
+
+## Add AWS configuration details to .travis.yml file's deploy script
+
+1. Set the region. The region code can be found by clicking the region in the toolbar next to your username.
+   - eg: 'us-east-1'
+1. app should be set to the Application Name (Step #4 in the Initial Setup above)
+   - eg: 'docker'
+1. env should be set to the lower case of your Beanstalk Environment name.
+   - 'docker-env'
+1. Set the bucket_name. This can be found by searching for the S3 Storage service. Click the link for the elasticbeanstalk bucket that matches your region code and copy the name.
+   - 'elasticbeanstalk-us-east-1-923445599289'
+1. Set the bucket_path to 'docker'
+1. Set access_key_id to $AWS_ACCESS_KEY
+1. Set secret_access_key to $AWS_SECRET_KEY
+
+## Create an IAM User
+
+1. Search for the "IAM Security, Identity & Compliance Service"
+1. Click "Create Individual IAM Users" and click "Manage Users"
+1. Click "Add User"
+1. Enter any name you’d like in the "User Name" field.
+   - eg: docker-react-travis-ci
+1. Tick the "Programmatic Access" checkbox
+1. Click "Next:Permissions"
+1. Click "Attach Existing Policies Directly"
+1. Search for "beanstalk"
+1. Tick the box next to "AWSElasticBeanstalkFullAccess"
+1. Click "Next:Tags"
+1. Click "Next:Review"
+1. Click "Create user"
+1. Copy and / or download the Access Key ID and Secret Access Key to use in the Travis Variable Setup.
+
+## Travis Variable Setup
+
+1. Go to your Travis Dashboard and find the project repository for the application we are working on.
+1. On the repository page, click "More Options" and then "Settings"
+1. Create an AWS_ACCESS_KEY variable and paste your IAM access key from step #13 above.
+1. Create an AWS_SECRET_KEY variable and paste your IAM secret key from step #13 above.
+
+## Deploying App
+
+1. Make a small change to your src/App.js file in the greeting text.
+1. In the project root, in your terminal run:
+   ```
+   git add.
+   git commit -m “testing deployment"
+   git push origin master
+   ```
+1. Go to your Travis Dashboard and check the status of your build.
+1. The status should eventually return with a green checkmark and show "build passing"
+1. Go to your AWS Elasticbeanstalk application
+1. It should say "Elastic Beanstalk is updating your environment"
+1. It should eventually show a green checkmark under "Health". You will now be able to access your application at the external URL provided under the environment name.
+
+# Building a Multi-Container Application
+
+## Application Architecture
+
+![](images/app-arch.png)
+
+## Application Flow
+
+![](images/app-flow.png)
