@@ -593,3 +593,11 @@ services:
 ## Application Flow
 
 ![](images/app-flow.png)
+
+## Routing
+
+1. We are using nginx to route things correctly
+1. We have a react server and an express server
+1. We want to route specific endpoints a specific server
+
+![](images/nginx-route.png)
