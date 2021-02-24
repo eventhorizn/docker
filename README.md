@@ -506,7 +506,9 @@ services:
    - Build Phase
    - Run Phase
 
-# Deployment with AWS and TravisCI
+# Deployment with AWS and TravisCI: docker-react
+
+1. [Standalone Project](https://github.com/eventhorizn/docker-react)
 
 ## Initial Setup
 
@@ -601,3 +603,159 @@ services:
 1. We want to route specific endpoints a specific server
 
 ![](images/nginx-route.png)
+
+## Deployment
+
+1. [Standalone Project](https://github.com/eventhorizn/docker-multi)
+   - This is the project that was setup to hook into TravisCI and AWS
+1. Inside you'll notice a Dockerrun.aws.json
+   - Works similarly to the docker-compose.yml
+1. We used TravisCI in this project to push images to DockerHub
+   - We will pull those images in the aws.json file when deploying
+1. Elastic Beanstalk uses Amazon ECS (Elastic Container Service) to run images
+   - [Amazon ECS Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html)
+1. We really care about [Container Definitions](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions)
+   - Get a better understanding of what we are writing in the aws.json file
+
+# Deployment with AWS and TravisCI: docker-multi
+
+## EBS Application Creation
+
+1. Go to AWS Management Console and use Find Services to search for Elastic Beanstalk
+1. Click “Create Application”
+1. Set Application Name to 'multi-docker'
+1. Scroll down to Platform and select Docker
+1. In Platform Branch, select Multi-Container Docker running on 64bit Amazon Linux
+1. Click Create Application
+1. You may need to refresh, but eventually, you should see a green checkmark underneath Health.
+
+## RDS Database Creation
+
+1. Go to AWS Management Console and use Find Services to search for RDS
+1. Click Create database button
+1. Select PostgreSQL
+1. In Templates, check the Free tier box.
+1. Scroll down to Settings.
+1. Set DB Instance identifier to multi-docker-postgres
+1. Set Master Username to postgres
+1. Set Master Password to postgrespassword and confirm.
+1. Scroll down to Connectivity. Make sure VPC is set to Default VPC
+1. Scroll down to Additional Configuration and click to unhide.
+1. Set Initial database name to fibvalues
+1. Scroll down and click Create Database button
+
+## ElastiCache Redis Creation
+
+1. Go to AWS Management Console and use Find Services to search for ElastiCache
+1. Click Redis in sidebar
+1. Click the Create button
+1. Make sure Cluster Mode Enabled is NOT ticked
+1. In Redis Settings form, set Name to multi-docker-redis
+1. Change Node type to 'cache.t2.micro'
+1. Change Replicas per Shard to 0
+1. Scroll down and click Create button
+
+## Creating a Custom Security Group
+
+1. Go to AWS Management Console and use Find Services to search for VPC
+1. Find the Security section in the left sidebar and click Security Groups
+1. Click Create Security Group button
+1. Set Security group name to multi-docker
+1. Set Description to multi-docker
+1. Make sure VPC is set to default VPC
+1. Click Create Button
+1. Scroll down and click Inbound Rules
+1. Click Edit Rules button
+1. Click Add Rule
+1. Set Port Range to 5432-6379
+1. Click in the box next to Source and start typing 'sg' into the box. Select the Security Group you just created.\
+1. Click Create Security Group
+
+## Applying Security Groups to ElastiCache
+
+1. Go to AWS Management Console and use Find Services to search for ElastiCache
+1. Click Redis in Sidebar
+1. Check the box next to Redis cluster
+1. Click Actions and click Modify
+1. Click the pencil icon to edit the VPC Security group. Tick the box next to the new multi-docker group and click Save
+1. Click Modify
+
+## Applying Security Groups to RDS
+
+1. Go to AWS Management Console and use Find Services to search for RDS
+1. Click Databases in Sidebar and check the box next to your instance
+1. Click Modify button
+1. Scroll down to Network and Security and add the new multi-docker security group
+1. Scroll down and click Continue button
+1. Click Modify DB instance button
+
+## Applying Security Groups to Elastic Beanstalk
+
+1. Go to AWS Management Console and use Find Services to search for Elastic Beanstalk
+1. Click Environments in the left sidebar.
+1. Click MultiDocker-env
+1. Click Configuration
+1. In the Instances row, click the Edit button.
+1. Scroll down to EC2 Security Groups and tick box next to multi-docker
+1. Click Apply and Click Confirm
+1. After all the instances restart and go from No Data to Severe, you should see a green checkmark under Health.
+
+## Add AWS configuration details to .travis.yml file's deploy script
+
+1. Set the region. The region code can be found by clicking the region in the toolbar next to your username.
+   - eg: 'us-east-1'
+1. app should be set to the EBS Application Name
+   - eg: 'multi-docker'
+1. env should be set to your EBS Environment name.
+   - eg: 'MultiDocker-env'
+1. Set the bucket_name. This can be found by searching for the S3 Storage service. Click the link for the elasticbeanstalk bucket that matches your region code and copy the name.
+1. eg: 'elasticbeanstalk-us-east-1-923445599289'
+1. Set the bucket_path to 'docker-multi'
+1. Set access_key_id to $AWS_ACCESS_KEY
+1. Set secret_access_key to $AWS_SECRET_KEY
+
+## Setting Environment Variables
+
+1. Go to AWS Management Console and use Find Services to search for Elastic Beanstalk
+1. Click Environments in the left sidebar.
+1. Click MultiDocker-env
+1. Click Configuration
+1. In the Software row, click the Edit button
+1. Scroll down to Environment properties
+1. In another tab Open up ElastiCache, click Redis and check the box next to your cluster. Find the Primary Endpoint and copy that value but omit the :6379
+1. Set REDIS_HOST key to the primary endpoint listed above, remember to omit :6379
+1. Set REDIS_PORT to 6379
+1. Set PGUSER to postgres
+1. Set PGPASSWORD to postgrespassword
+1. In another tab, open up the RDS dashboard, click databases in the sidebar, click your instance and scroll to Connectivity and Security. Copy the endpoint.
+1. Set the PGHOST key to the endpoint value listed above.
+1. Set PGDATABASE to fibvalues
+1. Set PGPORT to 5432
+1. Click Apply button
+1. After all instances restart and go from No Data, to Severe, you should see a green checkmark under Health.
+
+## IAM Keys for Deployment
+
+1. You can use the same IAM User's access and secret keys from the single container app we created earlier.
+
+## AWS Keys in Travis
+
+1. Go to your Travis Dashboard and find the project repository for the application we are working on.
+1. On the repository page, click "More Options" and then "Settings"
+1. Create an AWS_ACCESS_KEY variable and paste your IAM access key
+1. Create an AWS_SECRET_KEY variable and paste your IAM secret key
+
+## Deploying App
+
+1. Make a small change to your src/App.js file in the greeting text.
+1. In the project root, in your terminal run:
+   ```
+   git add.
+   git commit -m “testing deployment"
+   git push origin master
+   ```
+1. Go to your Travis Dashboard and check the status of your build.
+1. The status should eventually return with a green checkmark and show "build passing"
+1. Go to your AWS Elasticbeanstalk application
+1. It should say "Elastic Beanstalk is updating your environment"
+1. It should eventually show a green checkmark under "Health". You will now be able to access your application at the external URL provided under the environment name.
