@@ -586,6 +586,15 @@ services:
 1. It should say "Elastic Beanstalk is updating your environment"
 1. It should eventually show a green checkmark under "Health". You will now be able to access your application at the external URL provided under the environment name.
 
+## Cleanup
+
+1. We don't want to pay (unless we do)
+1. Go to the Elastic Beanstalk dashboard.
+1. In the left sidebar click "Applications"
+1. Click the application you'd like to delete.
+1. Click the "Actions" button and click "Delete Application"
+1. You will be prompted to enter the name of your application to confirm the deletion.
+
 # Building a Multi-Container Application
 
 ## Application Architecture
