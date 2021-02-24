@@ -780,3 +780,27 @@ services:
 1. Go to your AWS Elasticbeanstalk application
 1. It should say "Elastic Beanstalk is updating your environment"
 1. It should eventually show a green checkmark under "Health". You will now be able to access your application at the external URL provided under the environment name.
+
+# Kubernetes
+
+1. Using Elastic Beanstalk, we combined all our images together into a single 'app'
+1. If we needed to scale up, it would make multiple copies of the whole app
+   - nginx, server, client, and worker
+1. Really, the worker is the only container we would want to scale
+   - It takes on the brunt of the work
+1. Kubernetes is a system for running many different containers over multiple different machines
+1. You'd use it when you need to run many different containers w/ different images
+
+## Use In Development vs Production
+
+![](images/k8s-local.png)
+
+1. For Development, we use minikube
+   - Much smaller than a production version
+   - Using kubectl to manage containers in node
+   - Using minkube for managing vm itself
+1. With Docker for Windows, we will be using the built in k8s piece of that software
+   - Don't need minikube
+   - Will be using 'localhost' instead of ip address
+1. For Production, Amazon: EKS
+   - Can set up your own k8s cluster
