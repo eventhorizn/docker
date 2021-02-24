@@ -615,6 +615,8 @@ services:
 
 ## Deployment
 
+![](images/docker-multi-mdsp.png)
+
 1. [Standalone Project](https://github.com/eventhorizn/docker-multi)
    - This is the project that was setup to hook into TravisCI and AWS
 1. Inside you'll notice a Dockerrun.aws.json
@@ -625,6 +627,16 @@ services:
    - [Amazon ECS Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html)
 1. We really care about [Container Definitions](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions)
    - Get a better understanding of what we are writing in the aws.json file
+1. We are using Managed Data Service Providers for Redis and Postgres
+1. AWS Elastic Cache for Redis
+   - Automatically creates and maintains Redis instances
+   - Super easy to scale
+   - Built-in Logging and Maintenance
+   - Security is brtter
+   - Easier to Migrate Off of EB
+1. AWS Relational Database Service
+   - All the same as Elastic Cache plu
+   - Automated Backups and Rollbacks
 
 # Deployment with AWS and TravisCI: docker-multi
 
