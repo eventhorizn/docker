@@ -804,3 +804,108 @@ services:
    - Will be using 'localhost' instead of ip address
 1. For Production, Amazon: EKS
    - Can set up your own k8s cluster
+
+## Kubernetes vs Docker Compose
+
+### Docker Compose
+
+1. Each entry can optionally get docker-compose to build an image
+1. Each entry represents a container we want to create
+1. Each entry defines the networking reqs (ports)
+
+### Kubernetes
+
+[Official Documentation](https://kubernetes.io/)
+
+1. k8s expects all images to already be built
+1. One config file per object we want to create
+1. We have to manually set up all networking
+
+### How to Deploy Multi-Container App
+
+1. Make sure our image is hosted on docker hub
+1. Make one config file to create the container
+1. Make one config file to set up networking
+
+## k8s Configuration File: Pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-pod
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client
+      image: eventhorizn/multi-client
+      ports:
+        - containerPort: 3000
+```
+
+1. A configuration file is used to create an 'Object'
+   ![](images/k8s-object.png)
+1. An API Version defines a different set of 'objects' we can use
+   ![](images/k8s-api.png)
+1. What's a Pod?
+   ![](images/k8s-pod.png)
+   - In k8s you can't run an image in a cluster
+   - You must deploy a container in a Pod
+   - You must depoy 1 or more containers in a Pod
+   - Containers should serve a similar purpose!
+
+## k8s Configuration File: Service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-node-port
+spec:
+  type: NodePort
+  ports:
+    - port: 3050
+      targetPort: 3000
+      nodePort: 31515
+  selector:
+    component: web
+```
+
+1. What's a Service?
+   - Sets up networking in a k8s cluster
+   - ClusterIP, NodePort, LoadBalancer, Ingress
+     - Types of services
+1. NodePort exposes a container to the outside workd
+   ![](images/k8s-nodeport.png)
+   - Only good for dev purposes (for the most part)
+   - We use a label/connector design to hook up a Pod to a Service
+   - selector > component > web connects to labels > component > web
+
+## k8s Commands
+
+1. Feed config to kubectl
+   ```
+   kubectl apply -f <filename>
+   ```
+1. Get status of running pods
+   ```
+   kubectl get pods
+   ```
+1. Get status of running services
+   ```
+   kubectl get services
+   ```
+
+## Important Takeaways
+
+1. k8s is a system to deploy containerized apps
+1. **Nodes** are individual machines (or vms) that run containers
+1. **Masters** are machines (or vms) with a set of programs to manage nodes
+1. k8s didn't build our images, it got them from somewhere else
+1. k8s (the master) decided where to run each container
+   - Each node can run a dissimilar set of containers
+1. To deploy something, we update the desired state of the master w/ a config file
+1. The master works constantly to meet your desired state
+1. k8s can do things imperitavely or declaratively
+   - Try to do things declaratively
