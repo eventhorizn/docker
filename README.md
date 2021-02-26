@@ -1035,6 +1035,9 @@ This is quite difficult
    - NodePort exposes set of pods to outside world
 1. Any object in Node can access any other object by it's ClusterIP service
    - If an object doesn't have this service, it is unreachable
+1. You can create separate files for each service/object
+1. Or combine them all into one/many
+   - Maybe, deployment and ip service files should go together
 
 ## Applying Multiple Files
 
@@ -1057,3 +1060,43 @@ This is quite difficult
    ```
    kubectl apply -f k8s
    ```
+
+## Combine Configuration Files
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: eventhorizn/multi-server
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: server
+  ports:
+    - port: 5000
+      targetPort: 5000
+```
+
+1. We will be keeping the configuration files separate
+   - Lets you know how many objects are in your Node
+   - Allows you to know exactly which file has which configuration
