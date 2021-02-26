@@ -881,6 +881,7 @@ spec:
    - Only good for dev purposes (for the most part)
    - We use a label/connector design to hook up a Pod to a Service
    - selector > component > web connects to labels > component > web
+   - With Docker Desktop, you use localhost:NodePort to access
 
 ## k8s Commands
 
@@ -896,6 +897,38 @@ spec:
    ```
    kubectl get services
    ```
+1. Updating an object
+   - Update the config file
+   - Usually pointing to new image
+   ```
+   kubectl apply -f <filename>
+   ```
+   - This is the declarative approach!
+1. Get detailed info about an object
+   ```
+   kubectl describe <object type> <object name>
+   ```
+   - Use after updating an object to confirm it worked
+1. Deleting a pod
+   ```
+   kubectl delete -f <config file>
+   ```
+   - This is an imperative update...which yea, sometimes we gotta go imperative
+1. With deployments you can get pods and deployments
+
+   ```
+   kubectl get deployments
+
+   kubectl get pods
+   ```
+
+1. Update Image
+
+   ```
+   kubectl set image <object type>/<object name> <container name>=<new image>
+
+   kubectl set image deployment/client-deployment client=eventhorizn/multi-client:v5
+   ```
 
 ## Important Takeaways
 
@@ -909,3 +942,85 @@ spec:
 1. The master works constantly to meet your desired state
 1. k8s can do things imperitavely or declaratively
    - Try to do things declaratively
+
+## Making Updates
+
+1. In general, we want to use the declarative approach
+1. That means updating the configuration file and re-feeding kubectl
+1. There are limitations
+   - For instance, can't update the port!
+1. The issue is that we are using Pods object type
+1. Use Deployment object
+   - Maintains a set of identical pods ensuring that they have the correct config and that the right number exists
+   - Very similar to a Pod
+
+### Pods vs Deployment
+
+#### Pods
+
+1. Runs a single set of containers
+1. Good for one-off dev purposes
+1. Rarely used in production
+
+#### Deployment
+
+1. Runs a set of identical pods (one or more)
+1. Monitors the state of each pod, updating as necessary
+1. Good for dev
+1. Good for production
+1. So, in the instance of an update it can't do on an existing pod, it will delete and create a new pod
+
+## Deployment Object
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: eventhorizn/multi-client
+          ports:
+            - containerPort: 3000
+```
+
+## Triggering a Deployment Update
+
+1. You make a change to some code
+1. You push a new image to Docker Hub
+1. You want your k8s cluster to pull the latest image (automatically) and do a rolling update
+
+This is quite difficult
+
+1. The apply command in kubectl does **not** check for a new version of the image
+
+### Options to Trigger Update
+
+1. Manually delete pods to get deployment to recreate them w/ the latest version
+   - Dangerous, could delete wrong set of pods
+1. Tag built images w/ a real version number and specify that version in the config file
+   - Actionable change for config file to rebuild
+   - Adds an extra step in the prod deployment process
+1. Use an imperative command to update the image version the deployment should use
+
+   - Tag the image w/ a version
+   - Manually update the image version the deployment should use
+   - This is the approach we are going to use
+
+   ```
+   docker build -t eventhorizn/multi-client:v5 .
+
+   docker push eventhorizn/multi-client:v5
+
+   kubectl set image deployment/client-deployment client=eventhorizn/multi-client:v5
+   ```
