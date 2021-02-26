@@ -1024,3 +1024,7 @@ This is quite difficult
 
    kubectl set image deployment/client-deployment client=eventhorizn/multi-client:v5
    ```
+
+# Kubernetes Path to Production
+
+![](images/k8s-prod-path.png)
