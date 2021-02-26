@@ -1028,3 +1028,32 @@ This is quite difficult
 # Kubernetes Path to Production
 
 ![](images/k8s-prod-path.png)
+
+## ClusterIP vs NodePort Services
+
+1. ClustIP exposes a set of pods to other objects in the cluster
+   - NodePort exposes set of pods to outside world
+1. Any object in Node can access any other object by it's ClusterIP service
+   - If an object doesn't have this service, it is unreachable
+
+## Applying Multiple Files
+
+1. Deleting an old deployment (from above)
+   - Cleanup
+   ```
+   kubectl get deployments
+   ```
+   ```
+   kubectl delete deployment client-deployment
+   ```
+   ```
+   kubectl get services
+   ```
+   ```
+   kubectl delete service client-node-port
+   ```
+1. Applying group
+   - Apply by directory
+   ```
+   kubectl apply -f k8s
+   ```
