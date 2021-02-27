@@ -1100,3 +1100,61 @@ spec:
 1. We will be keeping the configuration files separate
    - Lets you know how many objects are in your Node
    - Allows you to know exactly which file has which configuration
+
+## Volumes
+
+1. Why do we need a Volume w/ Postgres?
+   - If the pod that holds Postgres crashes, a new one is created
+   - When that happens, all the data in the crashed pod is gone
+1. Volume is on the host machine
+   - Postgres 'thinks' it's writing to fs on container
+1. Because of Volumes, scaling up a postgres pod w/ multiple images takes more configuration than increasing the replicas
+1. A **Volume** in k8s is an object that allows a container to store data at the pod level
+
+![](images/k8s-vol.png)
+
+### Volumes vs Persistent Volumes
+
+1. k8s volumes is pod based
+   - Lifecycle: Pod is destroyed, so is volume
+1. Persistent Volume is stored outside a pod
+   - Lifecycle: 'lasts for all time'
+   - Or someone deletes
+
+### Persistent Volume vs Persistent Volume Claims
+
+1. Persistent Volume Claim is an 'advertisement' of what's available
+   - It's just an 'option'
+1. When a pod requests a Claim, k8s will either use pre-built volumes, or build one if pod is requestsing something that isn't already built
+
+## Persistent Volume Claim Configuration
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+```
+
+1. Access Modes
+   - ReadWriteOnce
+     - Can be used by a single node
+   - ReadOnlyMany
+     - Multiple nodes can read from this
+   - ReadWriteMany
+     - Can be read and written to by many nodes
+1. Storage location
+   - Pretty obvious, but just your hardrive
+   ```
+   kubectl get storageclass
+   ```
+   ```
+   kubectl describe storageclass
+   ```
+   - [Storage Class Options](https://kubernetes.io/docs/concepts/storage/storage-classes/)
