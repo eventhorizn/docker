@@ -1158,3 +1158,20 @@ spec:
    kubectl describe storageclass
    ```
    - [Storage Class Options](https://kubernetes.io/docs/concepts/storage/storage-classes/)
+1. Get Persistent Volumes
+   ```
+   kubectl get pv
+   ```
+   ```
+   kubectl get pvc
+   ```
+
+## Environment Variables
+
+![](images/k8s-env-vars.png)
+
+1. Red is a 'url' of sorts
+   - How we connect to redis and postgres
+1. Yellow are constant values
+1. Password is different
+   - We'll want to encode
