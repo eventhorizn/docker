@@ -1175,3 +1175,14 @@ spec:
 1. Yellow are constant values
 1. Password is different
    - We'll want to encode
+1. Generating encoded secret
+
+   ```
+   kubectl create secret generic <secret-name> --from-literal key=value
+
+   kubectl create secret generic pgpassword --from-literal PGPASSWORD=12345asdf
+   ```
+
+   ```
+   kubectl get secrets
+   ```
