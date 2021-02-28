@@ -1186,3 +1186,45 @@ spec:
    ```
    kubectl get secrets
    ```
+
+# Handling Traffic with Ingress Controllers
+
+## LoadBalancer Service
+
+1. Legacy way of getting network traffic into a cluster
+1. Ingress is 'newer and better'
+1. If you use one in k8s, it will also provision one in your cloud provider
+1. Deprecated(ish)
+
+## Ingress Service
+
+1. We are using ingress-nginx
+   - A community led project (officially kubernetes)
+   - github.com/kubernetes/ingress-nginx
+1. We are not using kubernetes-ingress
+   - A project led by the company nginx
+   - github.com/nginxinc/kubernetes-ingress
+1. Setup of ingress-ngnix changes depending on you env
+   - (local, GC, AWS, Azure)
+   - We're going to do local and GC
+
+![](images/k8s-ingress-overview.png)
+
+1. For the ingress-nginx, the Ingress Controller and the 'thing' that routes traffic...are the same
+   - Think of having a separate router and controller, or having them together
+1. On Google Cloud, the Load Balancer (yes, the one we said to not use)...is being used
+1. Why not use our own custom ngnix Ingress router?
+   - Well, ofc an official implementation considers lots of things in k8s we don't know about
+   - For example, the ngnix-controller will route directly a pod instead of using the cluster IP service (which comes in handy for certain reasons)
+   - Ultimately, specialists do a better job than we would
+1. [Further Ingress Reading](https://www.joyfulbikeshedding.com/blog/2018-03-26-studying-the-kubernetes-ingress-system.html)
+1. Enabling ingress-nginx
+
+   - [Documentation Link](https://kubernetes.github.io/ingress-nginx/deploy/#provider-specific-steps)
+   - Use the instructions for Docker for Mac, even though we are using Docker for Windows
+
+   ```
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml
+
+   kubectl get pods -n ingress-nginx
+   ```
