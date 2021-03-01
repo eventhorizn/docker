@@ -430,6 +430,10 @@ CMD [ "redis-server" ]
    ```
    docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/usr/app <id>
    ```
+   - If using powershell
+   ```
+   docker run -p 3000:3000 -v /app/node_modules -v ${pwd}:/usr/app <id>
+   ```
    - -v /usr/app/node_modules
      - Needed as there's no node_modules on local machine to map to
    - $(pwd) = present working directory
@@ -1235,3 +1239,57 @@ spec:
    NET stop HTTP
    ```
    - There are many ways to kill whatever is using port 80, this is what I had to run to get mine freed up
+
+## Kubernetes Dashboard
+
+1. [Official Github Link](https://github.com/kubernetes/dashboard)
+1. Install the Dashboard
+   ```
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.2.0/aio/deploy/recommended.yaml
+   ```
+1. Launch the Dashboard
+   ```
+   kubectl proxy
+   ```
+
+# Kubernetes Production Deployment
+
+1. We are using Google Cloud...why?
+   - Google created Kubernetes
+   - AWS only 'recently' got k8s support
+   - Far easier to poke around k8s on Google Cloud
+   - Excellent documentation for beginners
+1. Hooking google cloud to travis CI was a big amount of work
+   - Created access account in google cloud
+   - Downloaded that into a json file
+   - Build a ruby docker image, installed travis ci
+   - Enctrypted that account.json file and added to travis ci script
+   - All so that travis can talk to our google cloud account
+1. We are using Helm v3 which deviates from the course
+   - Course used v2 w/ Tiller
+   - [Install Helm Script](https://helm.sh/docs/intro/install/#from-script)
+   - [Install ingress-nginx Helm](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
+1. The most annoying bug was causing issues w/ connecting to postgres
+   - Busted way
+   ```js
+   pgClient.on('connect', () => {
+   	pgClient
+   		.query('CREATE TABLE IF NOT EXISTS values (number INT)')
+   		.catch((err) => console.log(err));
+   });
+   ```
+   - Working way
+   ```js
+   pgClient
+   	.connect()
+   	.then(() => {
+   		pgClient
+   			.query('CREATE TABLE IF NOT EXISTS values (number INT)')
+   			.catch((err) => console.log(err));
+   	})
+   	.catch((err) => {
+   		console.log(err);
+   	});
+   ```
+   - Busted way worked locally and on AWS, but not Google Cloud
+   - Ultimately, I read the documentation on pgClient (always do that when making a real app)
