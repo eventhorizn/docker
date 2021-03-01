@@ -1293,3 +1293,21 @@ spec:
    ```
    - Busted way worked locally and on AWS, but not Google Cloud
    - Ultimately, I read the documentation on pgClient (always do that when making a real app)
+
+# Kubernetes Local Development
+
+1. With docker-compose, we can make a link between an image and our local files
+   - Any updates we make locally, transfer to the image
+1. With k8s, we are using already built images
+   - So, is the process, make a change, publish image, re-build?
+1. Skaffold solves the issue!
+   - Sees a change in code, and gets that change into our cluster
+   - Rebuild client image from scratch, update k8s
+   - Or, Inject updated fiel sinto client pod, rely on react app to auto update itself
+     - Relies on something like nodemon running
+1. [Skaffold Documentation](https://skaffold.dev/)
+   - Separate installation and config file
+1. Start Skaffold
+   ```
+   skaffold dev
+   ```
