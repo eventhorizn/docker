@@ -1228,3 +1228,10 @@ spec:
 
    kubectl get pods -n ingress-nginx
    ```
+
+1. ingress-nginx defaults (can can't be changed) to port 80
+   - I had services using port 80 on my computer, so had to kill it first
+   ```
+   NET stop HTTP
+   ```
+   - There are many ways to kill whatever is using port 80, this is what I had to run to get mine freed up
